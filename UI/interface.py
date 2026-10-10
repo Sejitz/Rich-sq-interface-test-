@@ -82,7 +82,7 @@ def interface_ui(live):
         "Search",
         "Inventory",
         "Shop",
-        "Exit"
+        "Back"
     ]
 
     # Interface menu layout
@@ -100,7 +100,7 @@ def inventory_ui(live, potion_quantity = 0, kunai_quantity = 0):
     options = [
         f"Potions: {potion_quantity}",
         f"Kunai: {kunai_quantity}\n",
-        "Exit"
+        "Back"
     ]
 
     live.update(draw_menu(options, 0), refresh=True)
@@ -119,7 +119,7 @@ def shop_ui(live, balance):
     options = [
         f"Potion: {potion_price}",
         f"Kunai: {kunai_price}\n",
-        "Exit Shop"
+        "Back"
     ]
 
     live.update(draw_menu(options, 0), refresh=True)
@@ -284,50 +284,75 @@ def run_ui():
         ) as live:
 
 
-            choice = main_ui(live)
+            screen = "main"
+            potion_amount = 4
+            kunai_amount = 7
+            balance = 0
 
-
-            if choice == "New Game":
-                # os.system("clear")
-                name = get_player_name(live)
-
-                choice = village_ui(live)
-
-
-                
-
-                choice = choice_ui(live)
-
-                if choice == "Yes":
+            while True:
+                if screen == "main":
+                    choice = main_ui(live)
+                    if choice == "New Game":
+                        screen = "village"
+                    elif choice == "Load Gamed":
+                        screen = "Load"
+                    elif choice == "Exit":
+                        break
+                        
+                elif screen == "village":
+                    name = get_player_name(live)
+                    village = village_ui(live)
+                    screen = "choice"
                     
+                elif screen == "choice":
+                    choice = choice_ui(live)
+                    if choice == "No":
+                        screen = "main"
+                    elif choice == "Yes":
+                        screen = "interface"
+                        
+                elif screen == "interface":
                     choice = interface_ui(live)
-
                     if choice == "Search":
-                        choice = battle_ui(live)
+                        screen = "battle"
                     elif choice == "Inventory":
-                        potion_amount = 4
-                        kunai_amount = 7
-                        
-                        choice = inventory_ui(live, potion_amount, kunai_amount)
+                        screen = "inventory"
                     elif choice == "Shop":
-                        balance = 0
-                        choice = shop_ui(live, balance)
+                        screen = "shop"
+                    elif choice == "Back":
+                        screen = "main"
                         
-                
-
+                elif screen == "battle":
+                    choice = battle_ui(live)
                     
+                elif screen == "inventory":
+                    choice = inventory_ui(live, potion_amount, kunai_amount)
+                    if choice == "Back":
+                        screen = "interface"
+
+                elif screen == "shop":
+                    choice = shop_ui(live, balance)
+                    if choice == "Back":
+                        screen = "interface"
+
+                # elif screen == "inv_back":
+                #     choice = interface_ui(live)
+
+                # elif screen == "shop_back":
+                #     choice = interface_ui(live)
+                    
+    
+                elif choice == "Load Game":
+                    console.print(
+                        "\nLoad Game selected."
+                    )
+    
+    
+                elif choice == "Exit":
+                    return
 
 
-            elif choice == "Load Game":
 
-                console.print(
-                    "\nLoad Game selected."
-                )
-
-
-            elif choice == "Exit":
-
-                return
 
     finally:
 
@@ -336,3 +361,4 @@ def run_ui():
             termios.TCSADRAIN,
             old_settings
         )
+        
